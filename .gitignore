@@ -1,0 +1,71 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# Python & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Paquetes y distribución
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Archivos temporales de renderizado multimedia
+.temp_build/
+*/.temp_build/
+clases/*/.temp_build/
+*.temp.mp4
+temp_*.wav
+temp_*.mp3
+test_*.mp3
+test_*.wav
+
+# Archivos multimedia pesados generados (videos y audios compilados)
+*.mp4
+*.m4a
+*.webm
+*.avi
+*.mov
+
+# Modelos locales y checkpoints pesados de TTS / Torch
+tts_models/
+*.pth
+*.pt
+*.bin
+*.onnx
+
+# Datos locales del usuario / grabaciones personales
+voces_clonadas/*.mp3
+voces_clonadas/*.wav
+!voces_clonadas/cynthia_optima_21s.wav
+!voces_clonadas/voces_meta.json
+
+# Proyectos de prueba generados localmente
+clases/clase_prueba/
+clases/prueba_codigo/
+clases/clase12/
+
+# Configuración local y secretos
+.env
+.env.*
+!.env.example
+
+# Herramientas y editores
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.vscode/
+.idea/
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+.DS_Store

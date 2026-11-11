@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador Universal de Videos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-inner: #0f172a;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #38bdf8;
+      --purple: #c084fc;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 24px 16px 80px;
+      line-height: 1.5;
+    }
+
+    .contenedor {
+      max-width: 880px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .paso-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .paso-titulo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .numero-paso {
+      background: var(--blue);
+      color: #0f172a;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .ayuda {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    select, input[type="text"], textarea {
+      background: var(--card-inner);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    button {
+      background: #334155;
+      color: var(--text);
+      border: 1px solid #475569;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:hover { filter: brightness(1.12); }
+
+    button.btn-azul {
+      background: var(--blue);
+      color: #0f172a;
+      border-color: var(--blue);
+    }
+    button.btn-violeta {
+      background: var(--purple);
+      color: #1e1b4b;
+      border-color: var(--purple);
+    }
+    button.btn-verde {
+      background: var(--green);
+      color: #052e16;
+      border-color: var(--green);
+      font-size: 16px;
+      padding: 14px 24px;
+    }
+    button.btn-rojo {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.35);
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--blue);
+      background: rgba(56, 189, 248, 0.06);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .dropzone:hover { background: rgba(56, 189, 248, 0.12); }
+
+    .dropzone.violeta {
+      border-color: var(--purple);
+      background: rgba(192, 132, 252, 0.06);
+    }
+    .dropzone.violeta:hover { background: rgba(192, 132, 252, 0.12); }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 99px;
+      font-size: 13px;
+    }
+
+    .bloque {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .bloque.es-slide { border-left: 5px solid var(--blue); }
+    .bloque.es-codigo { border-left: 5px solid var(--purple); }
+
+    .slide-fila {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .slide-img {
+      width: 100%;
+      height: 115px;
+      object-fit: contain;
+      background: #000;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .paso-cod {
+      background: #162032;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .consola {
+      background: #050811;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      color: var(--blue);
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .banner-estilo {
+      background: rgba(192, 132, 252, 0.12);
+      border: 1px solid rgba(192, 132, 252, 0.35);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #e9d5ff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="contenedor">
+
+    <h1 style="font-size: 24px;">🎬 Generador Universal de Videos con Diapositivas y Código</h1>
+
+    <!-- GUÍA DE FORMATOS RECOMENDADOS -->
+    <details style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; font-size: 13px; color: #cbd5e1; cursor: pointer;">
+      <summary style="font-weight: 700; color: var(--blue); font-size: 14px; outline: none;">
+        📖 Guía rápida: ¿En qué formato deben estar los archivos que subas? (Clic para desplegar)
+      </summary>
+      <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; border-top: 1px solid var(--border); padding-top: 14px;">
+        <div style="background: var(--card-inner); padding: 12px; border-radius: 8px; border-left: 3px solid var(--blue);">
+          <strong style="color: var(--blue);">1. Diapositivas / Slides</strong>
+          <ul style="margin: 8px 0 0 16px; font-size: 12px; line-height: 1.6;">
+            <li><b>PDF (.pdf):</b> Un solo archivo; extrae página 1 a slide 1, etc.</li>
+            <li><b>PowerPoint (.pptx / .ppt):</b> Extrae las diapositivas e imágenes.</li>
+            <li><b>Imágenes (.png, .jpg):</b> Si son sueltas, nombrarlas con número (<code>01_portada.png</code>, <code>02_tema.png</code>).</li>
+          </ul>
+        </div>
+        <div style="background: var(--card-inner); padding: 12px; border-radius: 8px; border-left: 3px solid var(--purple);">
+          <strong style="color: var(--purple);">2. Guion Narrativo</strong>
+          <ul style="margin: 8px 0 0 16px; font-size: 12px; line-height: 1.6;">
+            <li>Formatos: <b>.docx</b>, <b>.doc</b>, <b>.pdf</b>, <b>.md</b> o <b>.txt</b> (o escribirlo directo).</li>
+            <li><b>Estructura con tags:</b> Usá <code>[SLIDE 1]</code>, <code>[SLIDE 2]</code> y <code>[CODIGO: ruta/archivo.py]</code> para ordenar de arriba a abajo.</li>
+            <li>Si ponés párrafos bajo <code>[CODIGO: ...]</code>, se usan como locución de ese fragmento de código.</li>
+          </ul>
+        </div>
+        <div style="background: var(--card-inner); padding: 12px; border-radius: 8px; border-left: 3px solid #22c55e;">
+          <strong style="color: #86efac;">3. Código / Proyecto</strong>
+          <ul style="margin: 8px 0 0 16px; font-size: 12px; line-height: 1.6;">
+            <li><b>Carpeta entera o ZIP:</b> Sube todo el proyecto para el explorador de VS Code.</li>
+            <li><b>Scripts (.py, .js, .html):</b> Puede tener marcas <code># [PASO 1]</code> o separarse por funciones.</li>
+            <li><b>Notebooks (.ipynb):</b> Convierte celdas Markdown a voz y celdas Code a tipeo con outputs.</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <!-- PASO 1: CARPETA DEL PROYECTO -->
+    <div class="paso-card">
+      <div class="paso-titulo">
+        <span class="numero-paso">1</span>
+        <span>Elegí o creá la carpeta del proyecto</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px;">
+        <select id="select-clase" onchange="cambiarClase(this.value)"></select>
+        <input type="text" id="input-nueva-clase" placeholder="Nombre de carpeta (ej: proyecto1, demo_api)" style="width: 240px;">
+        <button class="btn-azul" onclick="crearNuevaClase()">+ Crear Proyecto</button>
+      </div>
+    </div>
+
+    <!-- PASO 2: SUBIR SLIDES (PDF, PPT, PPTX, PNG, JPG) -->
+    <div class="paso-card">
+      <div class="paso-titulo" style="justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="numero-paso">2</span>
+          <span>Subí las Diapositivas (PDF, PPTX, PPT o Imágenes)</span>
+        </div>
+        <button class="btn-rojo" onclick="eliminarArchivoClase('todas_slides', '')">🗑️ Borrar todas las diapositivas</button>
+      </div>
+      <p class="ayuda">
+        Si subís un <b>.pdf</b>, <b>.pptx</b> o <b>.ppt</b>, el sistema extrae automáticamente cada diapositiva como imagen HD lista para el video.
+      </p>
+      <div class="dropzone" id="dz-slides" onclick="document.getElementById('input-slides').click()">
+        <p style="font-size: 16px; font-weight: 700;" id="lbl-subir-slides">🖼️ Hacé clic o arrastrá acá tu presentación (.pdf, .pptx, .ppt, .png, .jpg)</p>
+        <input type="file" id="input-slides" multiple accept=".pdf,.ppt,.pptx,.png,.jpg,.jpeg,.webp" style="display: none" onchange="subirSlides(this.files)">
+      </div>
+      <div>
+        <div class="ayuda" style="margin-bottom: 6px;">Diapositivas listas en este proyecto (tocá ✕ para borrar una individual):</div>
+        <div class="chips" id="lista-slides"></div>
+      </div>
+    </div>
+
+    <!-- PASO 3: SUBIR O PEGAR EL GUION (PDF, DOCX, DOC, MD, TXT) -->
+    <div class="paso-card">
+      <div class="paso-titulo">
+        <span class="numero-paso">3</span>
+        <span>Subí o pegá tu Guion (PDF, Word DOCX/DOC, MD, TXT)</span>
+      </div>
+
+      <div class="dropzone" id="dz-guion" style="padding: 14px;" onclick="document.getElementById('input-guion').click()">
+        <p style="font-size: 15px; font-weight: 700;" id="lbl-subir-guion">📄 Subir archivo de Guion (.pdf, .docx, .doc, .md, .txt) — o pegalo directo abajo</p>
+        <input type="file" id="input-guion" accept=".pdf,.docx,.doc,.md,.txt" style="display: none" onchange="subirArchivoGuion(this.files)">
+      </div>
+
+      <!-- (Pendiente a futuro: Agente de estilo personalizado) -->
+      <details style="background: rgba(192, 132, 252, 0.05); border: 1px dashed rgba(192, 132, 252, 0.3); border-radius: 8px; padding: 10px 14px;">
+        <summary style="font-size: 13px; color: #d8b4fe; cursor: pointer; font-weight: 600;">
+          ⏳ Próximamente / A futuro: Adaptación automática a estilo conversacional personalizado
+        </summary>
+        <div id="banner-estilo" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span id="txt-estilo-info" style="font-size: 12px; color: var(--muted);">
+              🧠 <b>Módulo en pausa:</b> Podés entrenar tu estilo subiendo grabaciones (.txt, .srt) para adaptar automáticamente el vocabulario.
+            </span>
+            <button style="padding: 4px 10px; font-size: 12px; background: rgba(192, 132, 252, 0.25); border-color: rgba(192, 132, 252, 0.5);" onclick="document.getElementById('input-entrenar-estilo').click()">
+              🎙️ Subir transcripciones
+            </button>
+            <input type="file" id="input-entrenar-estilo" multiple accept=".txt,.srt,.vtt,.md" style="display: none" onchange="entrenarConMisTranscripciones(this.files)">
+          </div>
+          <div style="margin-top: 4px;">
+            <button class="btn-violeta" style="font-size: 12px; padding: 5px 12px;" onclick="convertirGuionAMiEstilo()">🗣️ Adaptar guion (experimental)</button>
+          </div>
+        </div>
+      </details>
+
+      <textarea id="textarea-guion" rows="7" placeholder="El texto del guion que subas aparece acá (también podés escribirlo o editarlo directo)..."></textarea>
+
+      <!-- GUÍA RÁPIDA DE PRONUNCIACIÓN DE INGLÉS (ACTIVA) -->
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #bae6fd; display: flex; flex-direction: column; gap: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <span>💡 <b>Pronunciación técnica en inglés:</b> Podés escribir marcas directas <code>{palabra|cómo leerla}</code> o etiquetas XML como <code>&lt;sub alias="erréy"&gt;array&lt;/sub&gt;</code></span>
+          <button class="btn-gris" style="font-size: 11px; padding: 4px 10px;" onclick="abrirModalDiccionario()">📖 Ver / Editar Diccionario Fonético</button>
+        </div>
+        <div style="font-size: 12px; color: #94a3b8;">
+          Ejemplos en tu guion: <code>el {backend|bákend}</code>, <code>la {FastAPI|Fast ei pi ai}</code>, <code>con {file|fáil}</code>, <code>la {API|a-pi}</code>. Términos comunes (frontend, JSON, script, deploy, loop, array) ya están en el diccionario automático.
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 4: SUBIR CÓDIGO (CARPETA DE PROYECTO VS CODE, .ZIP, .PY o NOTEBOOK .IPYNB) -->
+    <div class="paso-card">
+      <div class="paso-titulo" style="justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="numero-paso">4</span>
+          <span>Subí tu Proyecto de Código (Carpeta de VS Code, .zip, .py o .ipynb)</span>
+        </div>
+        <button class="btn-rojo" onclick="eliminarArchivoClase('todos_codigos', '')">🗑️ Borrar todo el código</button>
+      </div>
+      <p class="ayuda">
+        Podés subir <b>una carpeta entera de tu PC</b> o un <b>.zip</b> (y en el video se va a ver el árbol de carpetas real en la barra izquierda de VS Code), o archivos sueltos <b>.py</b> / <b>.ipynb</b>.
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="dropzone violeta" onclick="document.getElementById('input-carpeta-codigo').click()">
+          <p style="font-size: 15px; font-weight: 700;" id="lbl-subir-carpeta">📂 Elegir Carpeta entera de Proyecto</p>
+          <p class="ayuda">Sube toda la estructura de carpetas para VS Code</p>
+          <input type="file" id="input-carpeta-codigo" webkitdirectory directory multiple style="display: none" onchange="subirCodigo(this.files)">
+        </div>
+        <div class="dropzone violeta" id="dz-codigo" onclick="document.getElementById('input-codigo').click()">
+          <p style="font-size: 15px; font-weight: 700;" id="lbl-subir-codigo">📦 Subir archivo .ZIP, .PY o Notebook .IPYNB</p>
+          <p class="ayuda">O arrastralos acá</p>
+          <input type="file" id="input-codigo" multiple accept=".zip,.py,.ipynb,.js,.html,.css,.sql" style="display: none" onchange="subirCodigo(this.files)">
+        </div>
+      </div>
+      <div>
+        <div class="ayuda" style="margin-bottom: 6px;">Archivos del proyecto detectados (podés intercalar cualquiera en el Paso 5):</div>
+        <div class="chips" id="lista-codigos"></div>
+      </div>
+
+      <!-- BOTÓN PRINCIPAL PARA ARMAR LA SECUENCIA CON SLIDES Y CÓDIGO YA SUBIDOS -->
+      <div style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
+        <button class="btn-azul" style="width: 100%; font-size: 15px; padding: 12px 20px;" onclick="armarSecuenciaAutomatica()">
+          ✨ Emparejar Guion con Diapositivas y Código (Armar Secuencia del Paso 5)
+        </button>
+        <p class="ayuda" style="margin-top: 6px; text-align: center;">
+          Cruza tus diapositivas (Paso 2), tu guion (Paso 3) y tus archivos de código (Paso 4) y genera el orden de las escenas abajo.
+        </p>
+      </div>
+    </div>
+
+    <!-- PASO 5: ORDEN DEL VIDEO (DIAPOSITIVAS + CÓDIGO INTERCALADO) -->
+    <div class="paso-card">
+      <div class="paso-titulo" style="justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="numero-paso">5</span>
+          <span>Revisá el orden del Video (Diapositivas + Código intercalado)</span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="agregarBloqueSlide()">+ 🖼️ Agregar Diapositiva</button>
+          <button onclick="agregarBloqueCodigo()">+ 🐍 Intercalar Código acá</button>
+        </div>
+      </div>
+
+      <p class="ayuda">
+        Esta es la línea de tiempo de tu video de arriba hacia abajo. Usá ⬆️ ⬇️ para ordenar las escenas como prefieras.
+      </p>
+
+      <div id="lista-bloques" style="display: flex; flex-direction: column; gap: 14px;"></div>
+    </div>
+
+    <!-- PASO 6: CONFIGURACIÓN DE VOZ Y PARÁMETROS -->
+    <div class="paso-card">
+      <div class="paso-titulo">
+        <span class="numero-paso">6</span>
+        <span>Configuración de Voz y Pronunciación</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <label class="ayuda">Voz neuronal para narrar el video (Microsoft Edge):</label>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <select id="select-voz" onchange="cambiarSelectorVoz(this.value)" style="flex: 1;">
+              <!-- Se llena dinámicamente con las voces oficiales de Edge TTS -->
+            </select>
+            <button class="btn-gris" id="btn-probar-voz" onclick="probarVozActual()" title="Escuchar una muestra de esta voz" style="white-space: nowrap; padding: 6px 12px;">🔊 Probar</button>
+          </div>
+          <div id="caja-preview-voz" style="display: none; margin-top: 8px; background: var(--card-inner); padding: 8px; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; color: #a5f3fc; margin-bottom: 4px;">▶ Escuchando muestra con la voz seleccionada:</div>
+            <audio id="audio-preview-voz" controls style="width: 100%; height: 32px;"></audio>
+          </div>
+        </div>
+        <div>
+          <label class="ayuda">Nombre del archivo MP4 final:</label>
+          <input type="text" id="input-salida" value="video_final.mp4">
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer;">
+          <input type="checkbox" id="chk-diccionario-fonetico" checked style="width: 18px; height: 18px;">
+          <span>Pronunciación fonética automática para términos en inglés (backend, JSON, FastAPI, file, deploy, array, etc.)</span>
+        </label>
+        <!-- Estilo de habla guardado pero oculto por el momento -->
+        <input type="checkbox" id="chk-mi-estilo" style="display: none;">
+      </div>
+
+      <!-- Clonación de voz guardada a futuro / oculta -->
+      <details style="background: rgba(148, 163, 184, 0.05); border: 1px dashed var(--border); border-radius: 8px; padding: 10px 14px;">
+        <summary style="font-size: 12px; color: var(--muted); cursor: pointer;">
+          ⏳ Próximamente / A futuro: Clonación de voces propias (XTTS-v2 / F5-TTS)
+        </summary>
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+          <p class="ayuda" style="font-size: 12px; margin: 0;">
+            Sección en pausa temporal mientras se ajustan modelos con entonación regional argentina. Las voces Edge TTS activas arriba son 100% estables, rápidas y gratuitas.
+          </p>
+          <div id="lista-perfiles-voces" style="display: none;"></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- BOTÓN GENERAL DE GUARDADO -->
+    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin: -6px 0 10px 0;">
+      <span class="ayuda" style="font-size: 12px;">Guarda todas las escenas, guion y parámetros:</span>
+      <button onclick="guardarTodo()" style="padding: 10px 22px; font-size: 14px; font-weight: 600; background: #334155; border: 1px solid #475569;">
+        💾 Guardar Todos los Cambios
+      </button>
+    </div>
+
+    <!-- BLOQUE SEPARADO: RENDERIZADOR Y GENERACIÓN DE VIDEO -->
+    <div class="paso-card" style="border: 1px solid var(--green); background: linear-gradient(180deg, #162a2b 0%, #0f172a 100%);">
+      <div class="paso-titulo" style="justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="numero-paso" style="background: var(--green);">🎬</span>
+          <span style="color: #86efac; font-weight: 700; font-size: 18px;">Generación y Compilación del Video Final</span>
+        </div>
+        <div id="tiempo-estimado-badge" style="font-size: 12px; color: #a7f3d0; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 99px; padding: 4px 12px;">
+          ⏱️ Estimación restante: <b>calculando...</b>
+        </div>
+      </div>
+
+      <p class="ayuda" style="margin: 0; color: #cbd5e1;">
+        Al iniciar, el motor compilará diapositivas en alta definición 1080p, grabará el código tipeado con colores de sintaxis en VS Code y sincronizará la voz de forma continua.
+      </p>
+
+      <!-- Barra de progreso visual y tiempo restante -->
+      <div id="caja-progreso" style="display: none; flex-direction: column; gap: 8px; background: var(--card-inner); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+          <span id="progreso-texto" style="font-weight: 600; color: #38bdf8;">Preparando render...</span>
+          <span id="progreso-tiempo" style="color: #facc15; font-weight: 700;">Estimado restante: ~2 min</span>
+        </div>
+        <div style="width: 100%; height: 10px; background: #334155; border-radius: 99px; overflow: hidden;">
+          <div id="barra-progreso-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #38bdf8, #22c55e); transition: width 0.4s ease;"></div>
+        </div>
+      </div>
+
+      <div>
+        <button class="btn-verde" id="btn-generar" style="width: 100%; padding: 14px 20px; font-size: 16px; font-weight: 700; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);" onclick="generarVideo()">
+          🚀 Iniciar Generación de Video MP4
+        </button>
+      </div>
+
+      <div class="consola" id="consola" style="max-height: 180px; overflow-y: auto;">Listo para generar el video.</div>
+
+      <div id="caja-video" style="display: none; flex-direction: column; gap: 10px; margin-top: 10px; background: var(--card-inner); padding: 14px; border-radius: 10px; border: 1px solid #22c55e;">
+        <h3 style="font-size: 16px; color: var(--green);">🎉 ¡Video terminado con éxito! Podés reproducirlo o descargarlo acá:</h3>
+        <video id="video-player" controls style="width: 100%; border-radius: 10px; border: 1px solid var(--border);"></video>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL DICCIONARIO FONÉTICO -->
+  <div id="modal-diccionario" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #1e293b; border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 680px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 16px; color: #38bdf8;">📖 Diccionario Fonético de Términos Técnicos en Inglés</h3>
+        <button class="btn-gris" onclick="cerrarModalDiccionario()" style="padding: 4px 10px;">✕ Cerrar</button>
+      </div>
+      <div style="padding: 16px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px;">
+        <p class="ayuda" style="margin: 0; font-size: 13px;">
+          Cada vez que una de estas palabras aparezca en el guion, el motor de voz la pronunciará en español fonético exacto para que suene natural. Podés agregar tus propios términos o cambiar cómo se leen:
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; background: var(--card-inner); padding: 10px; border-radius: 8px;">
+          <input type="text" id="input-nueva-palabra" placeholder="Palabra (ej: pull request)" style="font-size: 13px;">
+          <input type="text" id="input-nueva-pron" placeholder="Cómo leerla (ej: pul rikuést)" style="font-size: 13px;">
+          <button class="btn-azul" onclick="agregarTerminoDiccionario()">+ Guardar</button>
+        </div>
+        <div id="lista-terminos-diccionario" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; max-height: 380px; overflow-y: auto;">
+          <!-- Se llena dinámicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let claseActual = "";
+    let datosClase = null;
+    let timerEstado = null;
+
+    let perfilesVocesClonadas = [];
+
+    async function iniciar() {
+      const res = await fetch("/api/clases");
+      const data = await res.json();
+      perfilesVocesClonadas = data.voces_clonadas || [];
+
+      // Módulo de estilo personalizado en pausa (a futuro)
+
+      const sel = document.getElementById("select-clase");
+      sel.innerHTML = "";
+      data.clases.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+
+      if (data.clases.length > 0) {
+        await cambiarClase(data.clases[0]);
+      }
+
+      configurarDrop("dz-slides", subirSlides);
+      configurarDrop("dz-guion", subirArchivoGuion);
+      configurarDrop("dz-codigo", subirCodigo);
+    }
+
+    function configurarDrop(id, callback) {
+      const el = document.getElementById(id);
+      el.addEventListener("dragover", e => e.preventDefault());
+      el.addEventListener("drop", e => {
+        e.preventDefault();
+        if (e.dataTransfer.files.length) callback(e.dataTransfer.files);
+      });
+    }
+
+    async function crearNuevaClase() {
+      const nombre = document.getElementById("input-nueva-clase").value.trim();
+      if (!nombre) return alert("Escribí un nombre para la carpeta de la clase");
+      const res = await fetch("/api/clases", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({nombre})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        document.getElementById("input-nueva-clase").value = "";
+        await iniciar();
+        await cambiarClase(data.nombre);
+      }
+    }
+
+    async function cambiarClase(nombre) {
+      claseActual = nombre;
+      document.getElementById("select-clase").value = nombre;
+      const res = await fetch(`/api/clases/${nombre}`);
+      datosClase = await res.json();
+      mostrarDatos();
+    }
+
+    function mostrarDatos() {
+      document.getElementById("lista-slides").innerHTML = datosClase.slides.length
+        ? datosClase.slides.map(s => `
+            <span class="chip" style="display:inline-flex;align-items:center;gap:8px;">
+              🖼️ ${s}
+              <span style="cursor:pointer;color:#fca5a5;font-weight:bold;" title="Borrar esta diapo" onclick="eliminarArchivoClase('slide', '${s.replace(/'/g, "\\'")}')">✕</span>
+            </span>`).join("")
+        : `<span class="ayuda">Todavía no subiste diapositivas.</span>`;
+
+      const cods = Object.keys(datosClase.codigos);
+      document.getElementById("lista-codigos").innerHTML = cods.length
+        ? cods.map(c => `
+            <span class="chip" style="display:inline-flex;align-items:center;gap:8px;">
+              🐍 ${c} (${datosClase.codigos[c].pasos.length} fragmentos)
+              <span style="cursor:pointer;color:#fca5a5;font-weight:bold;" title="Borrar este archivo de código" onclick="eliminarArchivoClase('codigo', '${c.replace(/'/g, "\\'")}')">✕</span>
+            </span>`).join("")
+        : `<span class="ayuda">Todavía no subiste archivos .py ni .ipynb.</span>`;
+
+      document.getElementById("textarea-guion").value = datosClase.guion_bruto || "";
+      actualizarSelectorVoces(datosClase.config.voz || "es-AR-ElenaNeural");
+      renderizarListaPerfilesVoces();
+      document.getElementById("input-salida").value = datosClase.config.titulo_salida || "video_final.mp4";
+      document.getElementById("chk-mi-estilo").checked = false; // Desactivado por defecto
+      document.getElementById("chk-diccionario-fonetico").checked = datosClase.config.usar_diccionario_fonetico !== false;
+
+      // Actualizar badge de estimación de tiempo para la clase cargada
+      const badgeEstimado = document.getElementById("tiempo-estimado-badge");
+      if (badgeEstimado) {
+        badgeEstimado.innerHTML = `⏱️ Estimación restante: <b>${estimarTiempoRestante(datosClase.config.bloques)}</b>`;
+      }
+
+      const cajaVid = document.getElementById("caja-video");
+      if (datosClase.tiene_video_final) {
+        cajaVid.style.display = "flex";
+        document.getElementById("video-player").src = `/clases/${claseActual}/${datosClase.video_final}?t=${Date.now()}`;
+      } else {
+        cajaVid.style.display = "none";
+      }
+
+      dibujarBloques();
+    }
+
+    function dibujarBloques() {
+      const cont = document.getElementById("lista-bloques");
+      cont.innerHTML = "";
+      const bloques = datosClase.config.bloques || [];
+
+      if (!bloques.length) {
+        cont.innerHTML = `<div class="ayuda" style="padding: 16px; text-align: center;">
+          Todavía no hay bloques en la secuencia. Subí tus slides en el Paso 2 y tocá <b>✨ 2. Emparejar párrafos del guion con mis Slides</b> en el Paso 3.
+        </div>`;
+        return;
+      }
+
+      bloques.forEach((b, idx) => {
+        const div = document.createElement("div");
+        div.className = `bloque ${b.tipo === 'slide' ? 'es-slide' : 'es-codigo'}`;
+
+        if (b.tipo === "slide") {
+          const opts = datosClase.slides.map(s => `<option value="${s}" ${s === b.archivo ? 'selected' : ''}>${s}</option>`).join("");
+          const imgUrl = b.archivo ? `/clases/${claseActual}/${b.archivo}` : "";
+          div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+              <strong>🖼️ Escena #${idx + 1} · Diapositiva</strong>
+              <div style="display:flex;gap:6px;">
+                <button onclick="moverBloque(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>⬆️</button>
+                <button onclick="moverBloque(${idx}, 1)" ${idx === bloques.length - 1 ? 'disabled' : ''}>⬇️</button>
+                <button class="btn-rojo" onclick="borrarBloque(${idx})">Quitar</button>
+              </div>
+            </div>
+            <div class="slide-fila">
+              <div>
+                <img class="slide-img" src="${imgUrl}" onerror="this.style.opacity=0.2">
+                <select style="margin-top:6px;" onchange="datosClase.config.bloques[${idx}].archivo = this.value; dibujarBloques();">
+                  <option value="">-- Elegir imagen --</option>
+                  ${opts}
+                </select>
+              </div>
+              <div>
+                <label class="ayuda">Guion narrado durante esta diapositiva:</label>
+                <textarea rows="4" oninput="datosClase.config.bloques[${idx}].locucion = this.value">${b.locucion || ""}</textarea>
+              </div>
+            </div>
+          `;
+        } else {
+          const cods = Object.keys(datosClase.codigos);
+          const opts = cods.map(c => `<option value="${c}" ${c === b.archivo ? 'selected' : ''}>${c}</option>`).join("");
+          const pasos = (datosClase.codigos[b.archivo]?.pasos) || [];
+
+          const htmlPasos = pasos.map((p, pIdx) => {
+            let codigoResaltado = "";
+            try {
+              codigoResaltado = hljs.highlight(p.codigo || "", { language: 'python', ignoreIllegals: true }).value;
+            } catch (e) {
+              codigoResaltado = (p.codigo || "").replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            return `
+            <div class="paso-cod">
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:13px;font-weight:700;color:var(--purple);">Fragmento #${pIdx + 1}</span>
+                <button class="btn-rojo" onclick="borrarPasoCodigo('${b.archivo}', ${pIdx})">Quitar fragmento</button>
+              </div>
+              <label class="ayuda">Voz en off mientras se escribe este código:</label>
+              <input type="text" value="${(p.locucion || '').replace(/"/g, '&quot;')}" oninput="datosClase.codigos['${b.archivo}'].pasos[${pIdx}].locucion = this.value">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <label class="ayuda">Código que se tipea en pantalla:</label>
+                <span style="font-size:11px;color:#94a3b8;">Vista previa con colores VS Code abajo</span>
+              </div>
+              <textarea rows="3" style="font-family:Consolas,monospace;background:#0d1117;color:#e6edf3;" oninput="datosClase.codigos['${b.archivo}'].pasos[${pIdx}].codigo = this.value; actualizarPreviaCodigo('${b.archivo}', ${pIdx}, this.value)">${p.codigo || ""}</textarea>
+              <pre style="background:#1e1e1e;border:1px solid #333;border-radius:6px;padding:8px 12px;margin:0;font-size:13px;line-height:1.45;overflow-x:auto;"><code class="hljs" id="preview-cod-${b.archivo.replace(/[^a-zA-Z0-9]/g, '_')}-${pIdx}">${codigoResaltado}</code></pre>
+            </div>
+            `;
+          }).join("");
+
+          div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <strong>🐍 Escena #${idx + 1} · Código en Vivo:</strong>
+                <select style="width:220px;" onchange="datosClase.config.bloques[${idx}].archivo = this.value; dibujarBloques();">
+                  ${opts}
+                </select>
+                <button onclick="agregarPasoCodigo('${b.archivo}')">+ Agregar fragmento</button>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button onclick="moverBloque(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>⬆️</button>
+                <button onclick="moverBloque(${idx}, 1)" ${idx === bloques.length - 1 ? 'disabled' : ''}>⬇️</button>
+                <button class="btn-rojo" onclick="borrarBloque(${idx})">Quitar</button>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              ${htmlPasos}
+            </div>
+          `;
+        }
+
+        cont.appendChild(div);
+      });
+    }
+
+    function actualizarPreviaCodigo(archivo, idx, codigo) {
+      const idElem = `preview-cod-${archivo.replace(/[^a-zA-Z0-9]/g, '_')}-${idx}`;
+      const elem = document.getElementById(idElem);
+      if (!elem) return;
+      try {
+        elem.innerHTML = hljs.highlight(codigo || "", { language: 'python', ignoreIllegals: true }).value;
+      } catch (e) {
+        elem.textContent = codigo || "";
+      }
+    }
+
+    async function eliminarArchivoClase(tipo, archivo) {
+      if (tipo === "todas_slides" && !confirm("¿Seguro que querés borrar todas las diapositivas de este proyecto?")) return;
+      if (tipo === "todos_codigos" && !confirm("¿Seguro que querés borrar todos los archivos de código de este proyecto?")) return;
+
+      await fetch(`/api/clases/${claseActual}/eliminar-archivo`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({tipo, archivo})
+      });
+      await cambiarClase(claseActual);
+    }
+
+    async function subirSlides(files) {
+      if (!files.length) return;
+      await guardarTodo(false);
+      const lbl = document.getElementById("lbl-subir-slides");
+      lbl.textContent = "⏳ Procesando y extrayendo diapositivas...";
+      const fd = new FormData();
+      for (const f of files) fd.append("file", f);
+      await fetch(`/api/clases/${claseActual}/subir-slides`, { method: "POST", body: fd });
+      lbl.textContent = "🖼️ Hacé clic o arrastrá acá tu presentación (.pdf, .pptx, .ppt, .png, .jpg)";
+      await cambiarClase(claseActual);
+    }
+
+    async function subirArchivoGuion(files) {
+      if (!files.length) return;
+      await guardarTodo(false);
+      const lbl = document.getElementById("lbl-subir-guion");
+      lbl.textContent = "⏳ Extrayendo texto del documento...";
+      const fd = new FormData();
+      for (const f of files) fd.append("file", f);
+      await fetch(`/api/clases/${claseActual}/subir-guion`, { method: "POST", body: fd });
+      lbl.textContent = "📄 Subir archivo de Guion (.pdf, .docx, .doc, .md, .txt) — o pegalo directo abajo";
+      await cambiarClase(claseActual);
+    }
+
+    async function subirCodigo(files) {
+      if (!files.length) return;
+      await guardarTodo(false);
+      const lbl = document.getElementById("lbl-subir-codigo");
+      const lblCarp = document.getElementById("lbl-subir-carpeta");
+      lbl.textContent = "⏳ Subiendo y procesando proyecto...";
+      lblCarp.textContent = "⏳ Subiendo estructura de carpetas...";
+
+      const ignorar = ["/.venv/", "/venv/", "/node_modules/", "/.git/", "/__pycache__/"];
+      const fd = new FormData();
+      for (const f of files) {
+        const rel = (f.webkitRelativePath || f.name).replace(/\\/g, "/");
+        if (ignorar.some(ig => ("/" + rel).includes(ig))) continue;
+        fd.append("relpath", rel);
+        fd.append("file", f);
+      }
+
+      const res = await fetch(`/api/clases/${claseActual}/subir-codigo`, { method: "POST", body: fd });
+      const data = await res.json();
+      lbl.textContent = "📦 Subir archivo .ZIP, .PY o Notebook .IPYNB";
+      lblCarp.textContent = "📂 Elegir Carpeta entera de Proyecto";
+      await cambiarClase(claseActual);
+      if (data.codigos?.length) {
+        data.codigos.forEach(c => {
+          if (!datosClase.config.bloques.some(b => b.tipo === "codigo_anotado" && b.archivo === c)) {
+            datosClase.config.bloques.push({ tipo: "codigo_anotado", archivo: c });
+          }
+        });
+        dibujarBloques();
+      }
+    }
+
+    async function entrenarConMisTranscripciones(files) {
+      if (!files.length) return;
+      const fd = new FormData();
+      for (const f of files) fd.append("file", f);
+      document.getElementById("txt-estilo-info").innerHTML = "⏳ <b>Entrenando nuevo perfil de habla...</b>";
+      const res = await fetch("/api/entrenar-estilo", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.ok) {
+        alert("✅ ¡Nuevo perfil de habla entrenado con éxito!\nMuletillas aprendidas: " + (data.muletillas || []).join(", "));
+        await iniciar();
+      } else {
+        alert("Error al entrenar: " + (data.error || "Desconocido"));
+      }
+    }
+
+    async function convertirGuionAMiEstilo() {
+      const txt = document.getElementById("textarea-guion").value.trim();
+      if (!txt) return alert("Primero subí o pegá un guion en el Paso 3.");
+      const res = await fetch("/api/adaptar-estilo", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({texto: txt, intensidad: "conversacional"})
+      });
+      const data = await res.json();
+      document.getElementById("textarea-guion").value = data.texto_convertido;
+    }
+
+    async function convertirTodosLosBloquesAMiEstilo() {
+      for (const b of datosClase.config.bloques) {
+        if (b.tipo === "slide" && b.locucion) {
+          const r = await fetch("/api/adaptar-estilo", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({texto: b.locucion, intensidad: "conversacional"})
+          });
+          const d = await r.json();
+          b.locucion = d.texto_convertido;
+        } else if (b.tipo === "codigo_anotado" && datosClase.codigos[b.archivo]) {
+          for (const p of datosClase.codigos[b.archivo].pasos) {
+            if (p.locucion) {
+              const r = await fetch("/api/adaptar-estilo", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({texto: p.locucion, intensidad: "conversacional"})
+              });
+              const d = await r.json();
+              p.locucion = d.texto_convertido;
+            }
+          }
+        }
+      }
+      dibujarBloques();
+    }
+
+    async function armarSecuenciaAutomatica() {
+      if (!datosClase.slides.length) {
+        return alert("Primero subí tu presentación (.pdf, .pptx o imágenes) en el Paso 2.");
+      }
+      const txt = document.getElementById("textarea-guion").value.trim();
+      const res = await fetch(`/api/clases/${claseActual}/auto-emparejar`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({guion: txt})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        datosClase.config.bloques = data.bloques;
+        await guardarTodo(false);
+        await cambiarClase(claseActual);
+      }
+    }
+
+    function moverBloque(idx, dir) {
+      const arr = datosClase.config.bloques;
+      const dest = idx + dir;
+      if (dest < 0 || dest >= arr.length) return;
+      [arr[idx], arr[dest]] = [arr[dest], arr[idx]];
+      dibujarBloques();
+    }
+
+    function borrarBloque(idx) {
+      datosClase.config.bloques.splice(idx, 1);
+      dibujarBloques();
+    }
+
+    function agregarBloqueSlide() {
+      datosClase.config.bloques.push({
+        tipo: "slide",
+        archivo: datosClase.slides[0] || "",
+        locucion: ""
+      });
+      dibujarBloques();
+    }
+
+    function agregarBloqueCodigo() {
+      let cods = Object.keys(datosClase.codigos);
+      let arch = cods[0];
+      if (!arch) {
+        arch = prompt("Nombre para el archivo de código (ej: ejemplo.py):", "ejemplo.py");
+        if (!arch) return;
+        datosClase.codigos[arch] = {
+          raw: "",
+          pasos: [{
+            locucion: "Bueno, acá vamos a crear nuestro primer bloque de código.",
+            codigo: "print('Hola clase')",
+            zoom: "editor",
+            resaltar: "",
+            terminal: "",
+            salida: ""
+          }]
+        };
+      }
+      datosClase.config.bloques.push({
+        tipo: "codigo_anotado",
+        archivo: arch
+      });
+      dibujarBloques();
+    }
+
+    function agregarPasoCodigo(arch) {
+      datosClase.codigos[arch].pasos.push({
+        locucion: "Explicación del siguiente fragmento...",
+        codigo: "# Código acá",
+        zoom: "reset",
+        resaltar: "",
+        terminal: "",
+        salida: ""
+      });
+      dibujarBloques();
+    }
+
+    function borrarPasoCodigo(arch, pIdx) {
+      datosClase.codigos[arch].pasos.splice(pIdx, 1);
+      dibujarBloques();
+    }
+
+    function actualizarSelectorVoces(vozSeleccionada) {
+      const sel = document.getElementById("select-voz");
+      sel.innerHTML = `
+        <optgroup label="Voces Neuronales Técnicas Oficiales (Edge TTS)">
+          <option value="es-MX-JorgeNeural">🇲🇽 Jorge (Masculina México - Ideal Tutoriales Técnicos)</option>
+          <option value="es-MX-DaliaNeural">🇲🇽 Dalia (Femenina México - Clara y Neutral)</option>
+          <option value="es-AR-ElenaNeural">🇦🇷 Elena (Femenina Argentina - Rioplatense)</option>
+          <option value="es-AR-TomasNeural">🇦🇷 Tomás (Masculina Argentina - Rioplatense)</option>
+        </optgroup>
+      `;
+
+      if (vozSeleccionada && !vozSeleccionada.startsWith("clon:")) {
+        sel.value = vozSeleccionada;
+      } else {
+        sel.value = "es-MX-JorgeNeural";
+      }
+    }
+
+    function renderizarListaPerfilesVoces() {
+      const cont = document.getElementById("lista-perfiles-voces");
+      if (!cont) return;
+      if (!perfilesVocesClonadas.length) {
+        cont.innerHTML = "<span class='ayuda'>No hay voces clonadas guardadas todavía.</span>";
+        return;
+      }
+      cont.innerHTML = perfilesVocesClonadas.map(p => `
+        <span class="chip" style="display:inline-flex;align-items:center;gap:8px;background:#1e1b4b;border-color:var(--purple);color:#e9d5ff;">
+          ✨ <b>${p.nombre}</b> <small style="opacity:0.7;">(${p.archivo})</small>
+          <span style="cursor:pointer;color:#fca5a5;font-weight:bold;" title="Borrar esta voz" onclick="eliminarVozClonada('${p.archivo}')">✕</span>
+        </span>
+      `).join("");
+    }
+
+    async function registrarNuevaVozClonada() {
+      const inpNom = document.getElementById("input-nombre-perfil-voz");
+      const inpArch = document.getElementById("input-archivo-perfil-voz");
+      const nombre = inpNom.value.trim();
+      const files = inpArch.files;
+
+      if (!nombre) return alert("Por favor escribí un nombre para la voz (ej: 'Voz de Cynthia').");
+      if (!files.length) return alert("Por favor seleccioná un archivo de audio (.wav o .mp3).");
+
+      const fd = new FormData();
+      fd.append("nombre", nombre);
+      fd.append("file", files[0]);
+
+      const res = await fetch("/api/subir-muestra-voz", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.ok) {
+        perfilesVocesClonadas = data.voces_clonadas || [];
+        inpNom.value = "";
+        inpArch.value = "";
+        const nuevoVal = "clon:" + perfilesVocesClonadas[perfilesVocesClonadas.length - 1].archivo;
+        actualizarSelectorVoces(nuevoVal);
+        renderizarListaPerfilesVoces();
+        await guardarTodo(false);
+        alert("✅ Voz clonada '" + nombre + "' guardada y lista para usar en el selector.");
+      }
+    }
+
+    async function eliminarVozClonada(archivo) {
+      if (!confirm("¿Seguro que querés eliminar esta voz clonada?")) return;
+      const res = await fetch("/api/eliminar-voz-clon", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({archivo})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        perfilesVocesClonadas = data.voces_clonadas || [];
+        actualizarSelectorVoces("es-AR-ElenaNeural");
+        renderizarListaPerfilesVoces();
+        await guardarTodo(false);
+      }
+    }
+
+    async function probarVozActual() {
+      const voz = document.getElementById("select-voz").value;
+      const btn = document.getElementById("btn-probar-voz");
+      const caja = document.getElementById("caja-preview-voz");
+      const audio = document.getElementById("audio-preview-voz");
+
+      btn.disabled = true;
+      btn.textContent = "⏳ Generando prueba...";
+
+      try {
+        const res = await fetch("/api/probar-voz", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            voz: voz,
+            texto: "Hola, esta es una prueba de audio para comprobar cómo suena la narración de tu video con términos como backend, JSON o FastAPI."
+          })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          alert("Error al generar prueba de audio: " + (err.error || "Desconocido"));
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        audio.src = url;
+        caja.style.display = "block";
+        audio.play();
+      } catch (e) {
+        alert("Inconveniente al probar voz: " + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🔊 Probar";
+      }
+    }
+
+    async function guardarTodo(mostrarAviso = true) {
+      datosClase.config.voz = document.getElementById("select-voz").value;
+      datosClase.config.titulo_salida = document.getElementById("input-salida").value.trim() || "video_final.mp4";
+      datosClase.config.usar_mi_estilo = document.getElementById("chk-mi-estilo").checked;
+      datosClase.config.usar_diccionario_fonetico = document.getElementById("chk-diccionario-fonetico").checked;
+
+      await fetch(`/api/clases/${claseActual}/guardar`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          config: datosClase.config,
+          guion_bruto: document.getElementById("textarea-guion").value,
+          codigos_editados: datosClase.codigos
+        })
+      });
+      if (mostrarAviso) {
+        document.getElementById("consola").textContent = "✅ Cambios guardados en clases/" + claseActual;
+      }
+    }
+
+    function estimarTiempoRestante(bloques) {
+      if (!bloques || !bloques.length) return "1 min";
+      let slidesCount = 0;
+      let codigosCount = 0;
+      bloques.forEach(b => {
+        if (b.tipo === "slide") slidesCount++;
+        else codigosCount++;
+      });
+      // Edge TTS + FFmpeg tarda ~1.2s por slide y ~15s por bloque de código tipeado
+      const segundosTotales = Math.max(30, Math.round(slidesCount * 1.5 + codigosCount * 18));
+      const min = Math.floor(segundosTotales / 60);
+      const seg = segundosTotales % 60;
+      if (min === 0) return `~${seg} seg`;
+      return `~${min} min ${seg > 0 ? seg + 's' : ''}`;
+    }
+
+    async function generarVideo() {
+      await guardarTodo(false);
+      const btn = document.getElementById("btn-generar");
+      const cajaProgreso = document.getElementById("caja-progreso");
+      const barraFill = document.getElementById("barra-progreso-fill");
+      const txtProgreso = document.getElementById("progreso-texto");
+      const txtTiempo = document.getElementById("progreso-tiempo");
+      const badgeEstimado = document.getElementById("tiempo-estimado-badge");
+
+      btn.disabled = true;
+      btn.textContent = "⏳ Generando y ensamblando video... por favor esperá";
+      cajaProgreso.style.display = "flex";
+      barraFill.style.width = "5%";
+
+      const bloquesTotales = (datosClase.config.bloques || []).length || 1;
+      const tiempoEstInicial = estimarTiempoRestante(datosClase.config.bloques);
+      txtTiempo.textContent = `Estimado restante: ${tiempoEstInicial}`;
+      badgeEstimado.innerHTML = `⏱️ Estimación restante: <b>${tiempoEstInicial}</b>`;
+
+      const tInicio = Date.now();
+
+      await fetch(`/api/clases/${claseActual}/generar`, { method: "POST" });
+      if (timerEstado) clearInterval(timerEstado);
+
+      timerEstado = setInterval(async () => {
+        const res = await fetch(`/api/clases/${claseActual}/estado`);
+        const d = await res.json();
+        const c = document.getElementById("consola");
+        const logs = d.logs || [];
+        c.textContent = logs.join("\n");
+        c.scrollTop = c.scrollHeight;
+
+        // Analizar en los logs el avance de bloques: [X/Y]
+        let bloqueActual = 0;
+        for (let i = logs.length - 1; i >= 0; i--) {
+          const m = logs[i].match(/\[(\d+)\/(\d+)\]/);
+          if (m) {
+            bloqueActual = parseInt(m[1], 10);
+            break;
+          }
+        }
+
+        if (bloqueActual > 0) {
+          const pct = Math.min(95, Math.round((bloqueActual / bloquesTotales) * 100));
+          barraFill.style.width = pct + "%";
+          txtProgreso.textContent = `Procesando bloque ${bloqueActual} de ${bloquesTotales} (${pct}%)`;
+
+          const tiempoTranscurrido = (Date.now() - tInicio) / 1000;
+          const tiempoPorBloque = tiempoTranscurrido / bloqueActual;
+          const bloquesRestantes = Math.max(0, bloquesTotales - bloqueActual);
+          const segRestantes = Math.round(bloquesRestantes * tiempoPorBloque);
+          const minR = Math.floor(segRestantes / 60);
+          const segR = segRestantes % 60;
+          const strRestante = minR > 0 ? `~${minR}m ${segR}s` : `~${segR}s`;
+          txtTiempo.textContent = `Estimado restante: ${strRestante}`;
+          badgeEstimado.innerHTML = `⏱️ Estimación restante: <b>${strRestante}</b>`;
+        }
+
+        if (!d.corriendo) {
+          clearInterval(timerEstado);
+          barraFill.style.width = "100%";
+          txtProgreso.textContent = d.exito ? "✅ ¡Video finalizado con éxito!" : "❌ Proceso finalizado";
+          txtTiempo.textContent = "Listo";
+          badgeEstimado.innerHTML = `⏱️ Estado: <b>${d.exito ? 'Completado' : 'Detenido'}</b>`;
+          btn.disabled = false;
+          btn.textContent = "🚀 Iniciar Generación de Video MP4";
+          await cambiarClase(claseActual);
+        }
+      }, 1000);
+    }
+
+    let diccionarioFonetico = {};
+
+    async function abrirModalDiccionario() {
+      document.getElementById("modal-diccionario").style.display = "flex";
+      await cargarDiccionarioUI();
+    }
+
+    function cerrarModalDiccionario() {
+      document.getElementById("modal-diccionario").style.display = "none";
+    }
+
+    async function cargarDiccionarioUI() {
+      const res = await fetch("/api/diccionario-fonetico");
+      const d = await res.json();
+      diccionarioFonetico = d.diccionario || {};
+
+      const cont = document.getElementById("lista-terminos-diccionario");
+      const claves = Object.keys(diccionarioFonetico).sort();
+      cont.innerHTML = claves.map(k => `
+        <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+          <div>
+            <b style="color: #38bdf8;">${k}</b>
+            <span style="color: var(--text-dim);">➔</span>
+            <span style="color: #86efac; font-style: italic;">${diccionarioFonetico[k]}</span>
+          </div>
+          <span style="cursor: pointer; color: #fca5a5; font-weight: bold; margin-left: 8px;" title="Eliminar término" onclick="eliminarTerminoDiccionario('${k.replace(/'/g, "\\'")}')">✕</span>
+        </div>
+      `).join("");
+    }
+
+    async function agregarTerminoDiccionario() {
+      const inpP = document.getElementById("input-nueva-palabra");
+      const inpL = document.getElementById("input-nueva-pron");
+      const pal = inpP.value.trim().toLowerCase();
+      const pron = inpL.value.trim();
+      if (!pal || !pron) return alert("Completá la palabra y cómo se lee.");
+
+      diccionarioFonetico[pal] = pron;
+      await fetch("/api/diccionario-fonetico", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({diccionario: diccionarioFonetico})
+      });
+      inpP.value = "";
+      inpL.value = "";
+      await cargarDiccionarioUI();
+    }
+
+    async function eliminarTerminoDiccionario(pal) {
+      delete diccionarioFonetico[pal];
+      await fetch("/api/diccionario-fonetico", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({diccionario: diccionarioFonetico})
+      });
+      await cargarDiccionarioUI();
+    }
+
+    iniciar();
+  </script>
+</body>
+</html>

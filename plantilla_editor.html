@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>VS Code Completo</title>
+  <!-- Tema VS Code Dark Plus y coloreado Python -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: #111111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Ventana VS Code centrada con margen exterior holgado */
+    .ventana-vscode {
+      width: 88vw;
+      height: 86vh;
+      background: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 35px 80px rgba(0,0,0,0.85);
+      border: 1px solid #2d2d2d;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform-origin: center center;
+      transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    
+    /* Barra Superior de Título */
+    .barra-titulo {
+      background: #323233;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      font-size: 12px;
+      color: #cccccc;
+      border-bottom: 1px solid #252526;
+      user-select: none;
+    }
+    .botones-ventana { display: flex; gap: 8px; }
+    .circulo { width: 12px; height: 12px; border-radius: 50%; }
+    .rojo { background: #ff5f56; }
+    .amarillo { background: #ffbd2e; }
+    .verde { background: #27c93f; }
+    .titulo-central { font-size: 12px; color: #999999; }
+
+    /* Estructura central */
+    .area-principal {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Activity Bar Izquierda */
+    .activity-bar {
+      width: 48px;
+      background: #333333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 12px;
+      gap: 18px;
+      color: #858585;
+      font-size: 18px;
+      user-select: none;
+    }
+    .activity-bar .activo {
+      color: #ffffff;
+      position: relative;
+    }
+    .activity-bar .activo::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: -2px;
+      height: 24px;
+      width: 2px;
+      background: #ffffff;
+    }
+
+    /* Sidebar Explorador */
+    .sidebar-explorador {
+      width: 240px;
+      background: #252526;
+      border-right: 1px solid #181818;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      color: #cccccc;
+      user-select: none;
+      padding: 8px 6px;
+    }
+    .header-explorador {
+      padding: 8px 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #bbbbbb;
+      font-size: 11px;
+    }
+    .arbol-archivos {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 4px;
+    }
+    .item-arbol {
+      padding: 5px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .item-arbol.carpeta { font-weight: bold; color: #cccccc; }
+    .item-arbol.archivo-activo {
+      background: #37373d;
+      color: #ffffff;
+    }
+    .item-arbol.sub { padding-left: 24px; }
+
+    /* Panel de Trabajo (Editor + Terminal) */
+    .panel-trabajo {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #1e1e1e;
+      overflow: hidden;
+    }
+
+    /* Pestañas */
+    .tabs-bar {
+      height: 35px;
+      background: #252526;
+      display: flex;
+    }
+    .tab {
+      background: #1e1e1e;
+      color: #ffffff;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      border-top: 2px solid #007acc;
+      border-right: 1px solid #252526;
+    }
+
+    /* Editor de código */
+    .editor-contenedor {
+      flex: 1;
+      display: flex;
+      padding: 24px 16px;
+      overflow: hidden;
+      font-family: 'Consolas', 'Fira Code', monospace;
+    }
+    /* Lineas guía y número de línea con excelente contraste */
+    .lineas-guia {
+      width: 55px;
+      padding-right: 20px;
+      text-align: right;
+      color: #9da5b4;
+      font-size: 19px;
+      line-height: 1.6;
+      user-select: none;
+      border-right: 1px solid #3a3d41;
+      margin-right: 20px;
+    }
+    .codigo-editor {
+      flex: 1;
+      padding-right: 30px;
+      overflow: hidden;
+    }
+    pre code.hljs {
+      background: transparent !important;
+      padding: 0 !important;
+      font-size: 19px;
+      line-height: 1.6;
+      font-family: inherit;
+    }
+
+    /* Paleta VS Code Dark+ con colores ultrabrillantes y vivos sobre fondo oscuro (#1e1e1e) */
+    /* Cero colores oscuros: todo está calibrado para máxima legibilidad en video HD */
+    .hljs-keyword, .hljs-operator { color: #ff7b72 !important; font-weight: 700; } /* Rosa/Rojo coral brillante oficial VS Code */
+    .hljs-string { color: #a5d6ff !important; font-weight: 500; } /* Azul celeste muy claro y nítido */
+    .hljs-number { color: #79c0ff !important; font-weight: 600; } /* Cian eléctrico luminoso */
+    .hljs-title, .hljs-title.function_ { color: #d2a8ff !important; font-weight: 700; } /* Violeta/Púrpura brillante vibrante */
+    .hljs-title.class_, .hljs-built_in, .hljs-type { color: #ffa657 !important; font-weight: 600; } /* Naranja/Ámbar dorado vibrante */
+    .hljs-params { color: #ffffff !important; font-weight: 500; } /* Blanco puro de máximo contraste */
+    .hljs-literal, .hljs-boolean { color: #ff7b72 !important; font-weight: 700; } /* Coral vibrante */
+    .hljs-comment { color: #8b949e !important; font-style: italic; font-weight: 500; } /* Gris medio claro (nunca negro ni gris oscuro) */
+    .hljs-attr, .hljs-attribute { color: #7ee787 !important; font-weight: 600; } /* Verde neón brillante */
+    .hljs-tag, .hljs-name { color: #7ee787 !important; font-weight: 700; } /* Verde brillante */
+    .hljs-variable, .hljs-template-variable { color: #ffffff !important; } /* Variables en blanco puro */
+    pre code.hljs { color: #f0f6fc !important; font-weight: 500; } /* Texto base blanco de altísimo contraste */
+
+    /* Resaltado y atenuación de líneas */
+    .linea-codigo {
+      display: block;
+      transition: opacity 0.4s ease, background 0.4s ease;
+      padding: 2px 10px;
+      margin: 1px 0;
+      border-radius: 4px;
+    }
+    .linea-codigo.atenuada {
+      opacity: 0.25;
+    }
+    .linea-codigo.resaltada {
+      opacity: 1;
+      background-color: rgba(255, 255, 255, 0.08);
+      border-left: 3px solid #007acc;
+    }
+
+    /* Cursor titilante */
+    #cursor {
+      display: inline-block;
+      width: 9px;
+      height: 22px;
+      background-color: #58a6ff;
+      vertical-align: text-bottom;
+      animation: blink 0.8s infinite;
+      box-shadow: 0 0 8px rgba(88, 166, 255, 0.7);
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Terminal inferior */
+    .terminal-panel {
+      height: 180px;
+      background: #181818;
+      border-top: 1px solid #333333;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Consolas', monospace;
+    }
+    .terminal-header {
+      background: #1e1e1e;
+      padding: 6px 16px;
+      font-size: 11px;
+      color: #cccccc;
+      display: flex;
+      gap: 16px;
+      border-bottom: 1px solid #252526;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .terminal-tab-activa {
+      color: #ffffff;
+      border-bottom: 1px solid #ffffff;
+      padding-bottom: 2px;
+    }
+    .terminal-body {
+      flex: 1;
+      padding: 14px 20px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #cccccc;
+      overflow-y: auto;
+    }
+    .term-prompt { color: #27c93f; }
+    .term-path { color: #3572A5; }
+    .term-output { color: #ffffff; margin-top: 4px; }
+
+    /* Barra de estado */
+    .status-bar {
+      height: 22px;
+      background: #007acc;
+      color: #ffffff;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="ventana-vscode">
+    
+    <div class="barra-titulo">
+      <div class="botones-ventana">
+        <div class="circulo rojo"></div>
+        <div class="circulo amarillo"></div>
+        <div class="circulo verde"></div>
+      </div>
+      <div class="titulo-central" id="titulo-central">tareas.py - ifts18-clase12-api - Visual Studio Code</div>
+      <div></div>
+    </div>
+
+    <div class="area-principal">
+      <div class="activity-bar">
+        <div class="activo">📄</div>
+        <div>🔍</div>
+        <div>🌿</div>
+        <div>🐞</div>
+        <div>🧩</div>
+      </div>
+
+      <div class="sidebar-explorador">
+        <div class="header-explorador" id="header-explorador">EXPLORER: PROYECTO</div>
+        <div class="arbol-archivos" id="arbol-archivos">
+          <div class="item-arbol carpeta">📁 .venv</div>
+          <div class="item-arbol archivo-activo" id="tree-active">🐍 tareas.py</div>
+        </div>
+      </div>
+
+      <div class="panel-trabajo">
+        <div class="tabs-bar">
+          <div class="tab">
+            <span>🐍</span>
+            <span id="tab-nombre">tareas.py</span>
+          </div>
+        </div>
+
+        <div class="editor-contenedor">
+          <div class="lineas-guia" id="lineas-guia">1</div>
+          <div class="codigo-editor">
+            <pre><code class="language-python" id="codigo-texto"></code><span id="cursor"></span></pre>
+          </div>
+        </div>
+
+        <div class="terminal-panel">
+          <div class="terminal-header">
+            <div>Problems</div>
+            <div>Output</div>
+            <div>Debug Console</div>
+            <div class="terminal-tab-activa">Terminal</div>
+          </div>
+          <div class="terminal-body" id="terminal-body">
+            <div><span class="term-prompt">(.venv) PS </span><span class="term-path">C:\Users\Cynthia\Desktop\ifts18-clase12-api\backend&gt;</span> <span id="term-cmd"></span></div>
+            <div class="term-output" id="term-out"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div><span>🌿 master*</span> &nbsp;|&nbsp; <span>0 errors, 0 warnings</span></div>
+      <div><span>UTF-8</span> &nbsp;|&nbsp; <span>Spaces: 4</span> &nbsp;|&nbsp; <span>Python 3.10 (.venv)</span></div>
+    </div>
+
+  </div>
+
+  <script>
+    let textoAcumulado = "";
+    let lenguajeActual = "python";
+
+    function detectarLenguaje(nombre) {
+      const ext = (nombre.split('.').pop() || '').toLowerCase();
+      if (ext === 'js' || ext === 'jsx') return 'javascript';
+      if (ext === 'ts' || ext === 'tsx') return 'typescript';
+      if (ext === 'html') return 'html';
+      if (ext === 'css') return 'css';
+      if (ext === 'json') return 'json';
+      if (ext === 'sql') return 'sql';
+      return 'python';
+    }
+
+    function iconoPorArchivo(nombre) {
+      const ext = (nombre.split('.').pop() || '').toLowerCase();
+      if (ext === 'py') return '🐍';
+      if (ext === 'ipynb') return '📓';
+      if (ext === 'html') return '🌐';
+      if (ext === 'css') return '🎨';
+      if (ext === 'js' || ext === 'ts') return '🟨';
+      if (ext === 'json') return '📋';
+      if (ext === 'md') return '📄';
+      return '📄';
+    }
+
+    function setNombreArchivo(nombre, nombreProyecto = "proyecto") {
+      const soloNombre = nombre.split('/').pop().split('\\').pop();
+      document.getElementById("tab-nombre").textContent = soloNombre;
+      const treeActive = document.getElementById("tree-active");
+      if (treeActive) treeActive.textContent = iconoPorArchivo(soloNombre) + " " + soloNombre;
+      document.getElementById("titulo-central").textContent = `${soloNombre} - ${nombreProyecto} - Visual Studio Code`;
+      document.getElementById("header-explorador").textContent = `EXPLORER: ${nombreProyecto.toUpperCase()}`;
+    }
+
+    function setArbolProyecto(nombreProyecto, itemsArbol, archivoActivo) {
+      document.getElementById("header-explorador").textContent = `EXPLORER: ${nombreProyecto.toUpperCase()}`;
+      const soloActivo = archivoActivo.replace(/\\/g, '/');
+      const nombreCortoActivo = soloActivo.split('/').pop();
+      document.getElementById("tab-nombre").textContent = nombreCortoActivo;
+      document.getElementById("titulo-central").textContent = `${nombreCortoActivo} - ${nombreProyecto} - Visual Studio Code`;
+      lenguajeActual = detectarLenguaje(nombreCortoActivo);
+
+      const contenedor = document.getElementById("arbol-archivos");
+      contenedor.innerHTML = "";
+      itemsArbol.forEach(item => {
+        const div = document.createElement("div");
+        const nivelPad = 8 + (item.nivel || 0) * 16;
+        div.style.paddingLeft = `${nivelPad}px`;
+        if (item.es_carpeta) {
+          div.className = "item-arbol carpeta";
+          div.textContent = `📂 ${item.nombre}`;
+        } else {
+          const esActivo = (item.ruta === soloActivo || item.nombre === nombreCortoActivo);
+          div.className = "item-arbol" + (esActivo ? " archivo-activo" : "");
+          div.textContent = `${iconoPorArchivo(item.nombre)} ${item.nombre}`;
+        }
+        contenedor.appendChild(div);
+      });
+    }
+
+    function renderizarTexto(texto) {
+      textoAcumulado = texto;
+      const el = document.getElementById("codigo-texto");
+      try {
+        const resaltado = hljs.highlight(textoAcumulado, { language: lenguajeActual, ignoreIllegals: true }).value;
+        el.innerHTML = resaltado;
+      } catch (err) {
+        el.textContent = textoAcumulado;
+      }
+
+      const lineas = textoAcumulado.split("\n").length;
+      let numeros = "";
+      for (let i = 1; i <= lineas; i++) {
+        numeros += i + "<br>";
+      }
+      document.getElementById("lineas-guia").innerHTML = numeros;
+    }
+
+    function tipearCodigoSincronizado(codigoNuevo, duracionMs) {
+      return new Promise(resolve => {
+        if (!codigoNuevo) {
+          resolve();
+          return;
+        }
+
+        const textoBase = textoAcumulado;
+        const totalChars = codigoNuevo.length;
+        const tiempoInicio = performance.now();
+
+        function frame(ahora) {
+          const transcurrido = ahora - tiempoInicio;
+          const progreso = Math.min(1.0, transcurrido / duracionMs);
+          const charsAVisualizar = Math.min(totalChars, Math.floor(progreso * totalChars));
+
+          renderizarTexto(textoBase + codigoNuevo.slice(0, charsAVisualizar));
+
+          if (progreso < 1.0) {
+            requestAnimationFrame(frame);
+          } else {
+            renderizarTexto(textoBase + codigoNuevo);
+            resolve();
+          }
+        }
+
+        requestAnimationFrame(frame);
+      });
+    }
+
+    function agregarCaracter(char) {
+      renderizarTexto(textoAcumulado + char);
+    }
+
+    function aplicarZoom(zona) {
+      const ventana = document.querySelector('.ventana-vscode');
+      if (zona === 'editor') {
+        ventana.style.transformOrigin = '55% 35%';
+        ventana.style.transform = 'scale(1.22)';
+      } else if (zona === 'terminal') {
+        ventana.style.transformOrigin = '50% 80%';
+        ventana.style.transform = 'scale(1.25)';
+      } else if (zona === 'sidebar') {
+        ventana.style.transformOrigin = '20% 30%';
+        ventana.style.transform = 'scale(1.20)';
+      } else {
+        ventana.style.transform = 'scale(1)';
+      }
+    }
+
+    function resaltarLineas(desde, hasta) {
+      const el = document.getElementById("codigo-texto");
+      const lineas = el.innerHTML.split('\n');
+      
+      const procesadas = lineas.map((linea, idx) => {
+        const num = idx + 1;
+        if (num >= desde && num <= hasta) {
+          return `<span class="linea-codigo resaltada">${linea}</span>`;
+        } else {
+          return `<span class="linea-codigo atenuada">${linea}</span>`;
+        }
+      });
+
+      el.innerHTML = procesadas.join('\n');
+    }
+
+    function limpiarResaltado() {
+      document.querySelectorAll('.linea-codigo').forEach(el => {
+        el.classList.remove('atenuada', 'resaltada');
+      });
+    }
+
+    function ejecutarEnTerminal(comando, salidaTexto) {
+      document.getElementById("term-cmd").textContent = comando;
+      setTimeout(() => {
+        document.getElementById("term-out").innerHTML = salidaTexto;
+      }, 700);
+    }
+  </script>
+</body>
+</html>
